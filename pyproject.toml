@@ -1,0 +1,45 @@
+[project]
+name = "fastapiprojectlearn"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "谢孜衡", email = "257553768@qq.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.20.1",
+    "annotated-doc==0.0.5",
+    "annotated-types==0.8.0",
+    "anyio==4.15.1",
+    "asyncmy==0.2.14",
+    "click==8.5.0",
+    "fastapi==0.141.1",
+    "greenlet==3.5.5",
+    "h11==0.16.0",
+    "jinja2==3.1.6",
+    "mako==1.4.1",
+    "markupsafe==3.0.3",
+    "packaging==26.3",
+    "prettytable==3.18.0",
+    "psycopg2-binary>=2.9.13",
+    "psycopg[binary]>=3.3.6",
+    "pydantic>=2.14.1",
+    "pydantic-settings>=2.16.1",
+    "pyecharts==2.1.0",
+    "setuptools==84.0.0",
+    "simplejson==4.1.2",
+    "sqlalchemy==2.0.52",
+    "typing-extensions==4.16.0",
+    "typing-inspection==0.4.4",
+    "uvicorn==0.52.4",
+    "wcwidth==0.8.3",
+    "wheel==0.48.0",
+]
+
+[project.scripts]
+fastapiprojectlearn = "fastapiprojectlearn:main"
+
+[build-system]
+requires = ["uv_build>=0.13.4,<0.14.0"]
+build-backend = "uv_build"
