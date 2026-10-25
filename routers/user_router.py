@@ -1,8 +1,7 @@
 from fastapi import APIRouter,Depends,BackgroundTasks
 from core.cache import HRCache,InviteInfoSchema
-from models.user import UserModel
-from schemas.user_schema import UserLoginSchema, UserLoginRespSchema, UserInviteSchema, UserRegisterSchema, \
-    UserListRespSchema
+from models.user import UserModel, UserStatus
+from schemas.user_schema import UserLoginSchema, UserLoginRespSchema, UserInviteSchema, UserRegisterSchema,UserStatusUpdateSchema, UserListRespSchema
 from dependencies import get_session_instance,AuthHandler,get_auth_handler,get_cache_instance,get_super_user
 from models import AsyncSession
 from repository.user_repo import UserRepo,DepartmentRepo
@@ -26,6 +25,8 @@ async def login(
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="用户不存在")
         if not user.check_password(str(login_data.password)):
             raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="邮箱或密码错误！")
+        if user.status != UserStatus.ACTIVE:
+            raise HTTPException(status.HTTP_403_FORBIDDEN,detail="该员工状态不可用，请联系管理员！")
         tokens = auth_handler.encode_login_token(user.id)
         return {
             "access_token": tokens['access_token'],
@@ -122,3 +123,26 @@ async def user_list(
             department_id=department_id
         )
     return {"users": users}
+
+@router.patch(path="/status/update",summary="修改员工状态",response_model=ResponseSchema
+)
+async def update_status(
+    status_data: UserStatusUpdateSchema,
+    session: AsyncSession = Depends(get_session_instance),
+    _: UserModel = Depends(get_super_user),
+):
+    async with session.begin():
+        user_repo = UserRepo(session)
+        user: UserModel = await user_repo.get_by_id(status_data.user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="该员工不存在！"
+            )
+        if user.is_superuser:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="不能修改超级用户的状态！"
+            )
+        user.status = status_data.status
+    return ResponseSchema()
