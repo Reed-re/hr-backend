@@ -1,4 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.cache import HRCache
 from models.user import UserModel
 from repository.user_repo import UserRepo
 from core.auth import AuthHandler
@@ -40,3 +42,6 @@ async def get_super_user(
         return current_user
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="权限不足，仅superuser可操作！")
+
+def get_cache_instance():
+    return HRCache()

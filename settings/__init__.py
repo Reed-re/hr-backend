@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str = "sdfesfsefsfhe"
     JWT_ACCESS_TOKEN_EXPIRES : timedelta = timedelta(days=365)
     JWT_REFRESH_TOKEN_EXPIRES :timedelta = timedelta(days=365)
+    REDIS_HOST: str = "127.0.0.1"
+    REDIS_PORT: int = 6379
+    INVITE_EXPIRE = 60*60*24*2
+
     @computed_field
     @property
     def DATABASE_URL(self) -> str:
