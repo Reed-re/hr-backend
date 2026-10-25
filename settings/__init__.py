@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     JWT_REFRESH_TOKEN_EXPIRES :timedelta = timedelta(days=365)
     REDIS_HOST: str = "127.0.0.1"
     REDIS_PORT: int = 6379
-    INVITE_EXPIRE = 60*60*24*2
+    INVITE_EXPIRE: int = 60*60*24*2
     MAIL_USERNAME: str = Field(..., validation_alias="MAIL_USERNAME")
     MAIL_PASSWORD: str = Field(..., validation_alias="MAIL_PASSWORD")
     MAIL_FROM: str = Field(..., validation_alias="MAIL_USERNAME")
