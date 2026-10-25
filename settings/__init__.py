@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from pydantic_settings import BaseSettings
-from pydantic import computed_field
+from pydantic import computed_field,Field
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,6 +20,14 @@ class Settings(BaseSettings):
     REDIS_HOST: str = "127.0.0.1"
     REDIS_PORT: int = 6379
     INVITE_EXPIRE = 60*60*24*2
+    MAIL_USERNAME: str = Field(..., validation_alias="MAIL_USERNAME")
+    MAIL_PASSWORD: str = Field(..., validation_alias="MAIL_PASSWORD")
+    MAIL_FROM: str = Field(..., validation_alias="MAIL_USERNAME")
+    MAIL_PORT: int = 587
+    MAIL_SERVER: str = "smtp.qq.com"
+    MAIL_FROM_NAME: str = "Reed"
+    MAIL_STARTTLS: bool = True
+    MAIL_SSL_TLS: bool = False
 
     @computed_field
     @property

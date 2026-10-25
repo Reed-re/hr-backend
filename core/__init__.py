@@ -1,0 +1,2 @@
+def mail():
+    return None
