@@ -1,8 +1,16 @@
 from fastapi import APIRouter,Depends,BackgroundTasks
 from core.cache import HRCache,InviteInfoSchema
 from models.user import UserModel, UserStatus
-from schemas.user_schema import UserLoginSchema, UserLoginRespSchema, UserInviteSchema, UserRegisterSchema,UserStatusUpdateSchema, UserListRespSchema
-from dependencies import get_session_instance,AuthHandler,get_auth_handler,get_cache_instance,get_super_user
+from schemas.user_schema import (
+    UserLoginSchema,
+    UserLoginRespSchema,
+    UserInviteSchema,
+    UserRegisterSchema,
+    UserStatusUpdateSchema,
+    UserListRespSchema,
+    DepartmentListRespSchema
+)
+from dependencies import get_session_instance,AuthHandler,get_auth_handler,get_cache_instance,get_super_user,get_current_user
 from models import AsyncSession
 from repository.user_repo import UserRepo,DepartmentRepo
 from fastapi.exceptions import HTTPException
@@ -146,3 +154,14 @@ async def update_status(
             )
         user.status = status_data.status
     return ResponseSchema()
+
+@router.get(path="/department/list",summary="获取所有部门列表",response_model=DepartmentListRespSchema)
+async def department_list(
+    session: AsyncSession = Depends(get_session_instance),
+    _: str = Depends(get_current_user),
+):
+    async with session.begin():
+        department_repo = DepartmentRepo(session)
+        departments = await department_repo.get_department_list()
+
+    return {"departments": departments}
