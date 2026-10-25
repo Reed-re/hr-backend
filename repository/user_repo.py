@@ -30,7 +30,8 @@ class UserRepo(BaseRepo):
         if department_id:
             stmt = stmt.where(UserModel.department_id == department_id)
         offset = (page - 1) * size
-        stmt = stmt.offset(offset).limit(size)
+        limit = size
+        stmt = stmt.limit(limit).offset(offset).order_by(UserModel.created_at.desc())
         users = await self.session.scalars(stmt)
         return users.all()
 
