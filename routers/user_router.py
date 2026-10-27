@@ -9,7 +9,8 @@ from schemas.user_schema import (
     UserRegisterSchema,
     UserStatusUpdateSchema,
     UserListRespSchema,
-    DepartmentListRespSchema
+    DepartmentListRespSchema,
+    DingdingUserRespSchema
 )
 from dependencies import get_session_instance,AuthHandler,get_auth_handler,get_cache_instance,get_super_user,get_current_user
 from models import AsyncSession
@@ -229,20 +230,16 @@ async def dingtalk_callback(
 
         my_info_resp = await client.get(
             url=DingTalkApi.build_get_my_info_url(),
-            headers={
-                "x-acs-dingtalk-access-token": access_token,
-            }
+            headers={"x-acs-dingtalk-access-token": access_token,}
         )
 
         if my_info_resp.status_code != 200:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="钉钉个人信息获取失败！")
-
         my_info = my_info_resp.json()
         nick = my_info["nick"]
         mobile = my_info["mobile"]
         open_id = my_info["openId"]
         union_id = my_info["unionId"]
-
         # 4. 保存钉钉上用户的数据到数据库中
         async with session.begin():
             user_repo = UserRepo(session)
@@ -270,3 +267,13 @@ async def dingtalk_authorize_success(
         "ding_authorize_success.html",
         {"username": nick}
     )
+
+@router.get(path="/dingtalk/account",summary="获取自己的钉钉账号",response_model=DingdingUserRespSchema)
+async def dingtalk_account(
+    session: AsyncSession = Depends(get_session_instance),
+    current_user: UserModel = Depends(get_current_user),
+):
+    async with session.begin():
+        user_repo = UserRepo(session)
+        dingding_user = await user_repo.get_dingding_user( current_user.id)
+    return {"dingding_user": dingding_user}
