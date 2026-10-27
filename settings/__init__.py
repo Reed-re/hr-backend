@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     MAIL_FROM_NAME: str = "Reed"
     MAIL_STARTTLS: bool = True
     MAIL_SSL_TLS: bool = False
+    DINGTALK_CLIENT_ID: str = Field(..., validation_alias="DINGTALK_APP_KEY")
+    DINGTALK_CLIENT_SECRET: str = Field(..., validation_alias="DINGTALK_APP_SECRET")
+    BACKEND_BASE_URL: str = "https://glitter-math-lard.ngrok-free.dev"
 
     @computed_field
     @property
