@@ -62,5 +62,5 @@ class BaseModel(Base):
 
 from . import candidate
 from . import interview
-from . import position
+from . import positions
 from . import user

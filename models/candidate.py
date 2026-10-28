@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from . import BaseModel
 from .user import UserModel
-from .position import PositionModel
+from .positions import PositionModel
 
 class CandidateStatusEnum(str, enum.Enum):
     # 1. 已投递
