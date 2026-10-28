@@ -26,6 +26,7 @@ dependencies = [
     "mako==1.4.1",
     "markupsafe==3.0.3",
     "packaging==26.3",
+    "pillow>=13.0.0",
     "prettytable==3.18.0",
     "psycopg2-binary>=2.9.13",
     "psycopg[binary]>=3.3.6",
@@ -34,6 +35,8 @@ dependencies = [
     "pydantic-settings>=2.16.1",
     "pyecharts==2.1.0",
     "pyjwt==2.10.1",
+    "pymupdf>=2.0",
+    "pywin32>=312",
     "redis>=8.1.0",
     "setuptools==84.0.0",
     "shortuuid>=1.0.13",
@@ -48,6 +51,10 @@ dependencies = [
 
 [project.scripts]
 fastapiprojectlearn = "fastapiprojectlearn:main"
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
 
 [build-system]
 requires = ["uv_build>=0.13.4,<0.14.0"]
