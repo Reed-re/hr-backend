@@ -11,6 +11,7 @@ from core.pdf import WordToPdfConverter
 from loguru import logger
 from repository.candidate_repo import ResumeRepo
 from schemas.candidate_schema import ResumeUploadRespSchema
+from core.ocr import PaddleOcr
 
 # 上传简历
 @router.post(path="/resume/upload", summary="上传简历",response_model=ResumeUploadRespSchema)
@@ -62,3 +63,13 @@ async def resume_upload(
         resume_repo = ResumeRepo(session=session)
         resume = await resume_repo.create_resume(file_path=file_path, uploader_id=current_user.id)
     return {"resume": resume}
+
+@router.get("/resume/ocr/test")
+async def resume_ocr_test():
+    file_path = os.path.join(settings.RESUME_DIR, "e4765b9f-ec41-45d9-9674-eaa99992ef53.pdf")
+    paddle_ocr = PaddleOcr()
+    job_id = await paddle_ocr.create_job(file_path)
+    jsonl_url = await paddle_ocr.poll_for_state(job_id)
+    contents = await paddle_ocr.fetch_parsed_contents(jsonl_url)
+    logger.info(contents)
+    return "success"
