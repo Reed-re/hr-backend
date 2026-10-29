@@ -6,19 +6,17 @@ from settings import settings
 import httpx
 import asyncio
 from loguru import logger
-
-import base64
-
-import io
-import aiofiles
-from core.pdf import PDF2ImageConverter
-
-
 class PaddleOcr:
     def __init__(self):
         self.job_url = "https://paddleocr.aistudio-app.com/api/v2/ocr/jobs"
         self.access_token = settings.PADDLE_OCR_ACCESS_TOKEN
         self.model_name = "PaddleOCR-VL-1.5"
+        self.timeout = httpx.Timeout(
+            connect=10.0,
+            read=120.0,
+            write=120.0,
+            pool=10.0,
+        )
         self.headers = {
             "Authorization": f"bearer {self.access_token}",
         }
@@ -36,7 +34,7 @@ class PaddleOcr:
                 "model": self.model_name,
                 "optionalPayload": self.optional_payload
             }
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
                 job_resp = await client.post(self.job_url, json=payload, headers=self.headers)
         else:
             if not os.path.exists(file):
@@ -48,7 +46,7 @@ class PaddleOcr:
 
             with open(file, "rb") as fp:
                 files = {"file": fp}
-                async with httpx.AsyncClient() as client:
+                async with httpx.AsyncClient(timeout=self.timeout) as client:
                     job_resp = await client.post(self.job_url, headers=self.headers, data=data, files=files)
 
         if job_resp.status_code != 200:
@@ -60,7 +58,7 @@ class PaddleOcr:
 
     async def poll_for_state(self, job_id: str) -> str | None:
         while True:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
                 url = f"{self.job_url}/{job_id}"
                 job_result_response = await client.get(url, headers=self.headers)
                 if job_result_response.status_code != 200:
@@ -90,7 +88,7 @@ class PaddleOcr:
 
     async def fetch_parsed_contents(self, jsonl_url: str) -> List[str]:
         contents = []
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
             jsonl_response = await client.get(jsonl_url)
             if jsonl_response.status_code != 200:
                 raise ValueError(f"获取内容失败：{jsonl_response.text}")

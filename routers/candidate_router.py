@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File,status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File,status,BackgroundTasks
 from dependencies import get_session_instance, get_current_user
 from models import AsyncSession
 from models.user import UserModel
@@ -12,7 +12,10 @@ from loguru import logger
 from repository.candidate_repo import ResumeRepo
 from schemas.candidate_schema import ResumeUploadRespSchema
 from core.ocr import PaddleOcr
-
+from schemas.candidate_schema import ResumeParseTaskRespSchema,ResumePaseSchema,ResumeParseTaskInfoRespSchema
+from tasks import ocr_parse_resume_task
+from dependencies import get_cache_instance
+from core.cache import HRCache
 # 上传简历
 @router.post(path="/resume/upload", summary="上传简历",response_model=ResumeUploadRespSchema)
 async def resume_upload(
@@ -73,3 +76,23 @@ async def resume_ocr_test():
     contents = await paddle_ocr.fetch_parsed_contents(jsonl_url)
     logger.info(contents)
     return "success"
+
+@router.post(path="/resume/parse", summary="简历解析",response_model=ResumeParseTaskRespSchema)
+async def parse_resume(
+    resume_data: ResumePaseSchema,
+    background_tasks: BackgroundTasks,
+    _: UserModel = Depends(get_current_user),
+):
+    # 创建一个识别简历的后台任务
+    task_id = str(uuid4())
+    background_tasks.add_task(ocr_parse_resume_task, resume_id=resume_data.resume_id, task_id=task_id)
+    return {"task_id": task_id}
+
+@router.get(path="/resume/parse/{task_id}", summary="获取任务状态",response_model=ResumeParseTaskInfoRespSchema)
+async def get_task_status(
+    task_id: str,
+    cache: HRCache = Depends(get_cache_instance),
+    _: UserModel = Depends(get_current_user)
+):
+    task_info = await cache.get_task_info(task_id)
+    return task_info.model_dump()
