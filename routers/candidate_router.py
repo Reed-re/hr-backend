@@ -9,13 +9,14 @@ from uuid import uuid4
 import aiofiles
 from core.pdf import WordToPdfConverter
 from loguru import logger
-from repository.candidate_repo import ResumeRepo
-from schemas.candidate_schema import ResumeUploadRespSchema
+from repository.candidate_repo import ResumeRepo,CandidateRepo
+from schemas.candidate_schema import ResumeUploadRespSchema,CandidateCreateSchema
 from core.ocr import PaddleOcr
 from schemas.candidate_schema import ResumeParseTaskRespSchema,ResumePaseSchema,ResumeParseTaskInfoRespSchema
 from tasks import ocr_parse_resume_task
 from dependencies import get_cache_instance
 from core.cache import HRCache
+from schemas import ResponseSchema
 # 上传简历
 @router.post(path="/resume/upload", summary="上传简历",response_model=ResumeUploadRespSchema)
 async def resume_upload(
@@ -96,3 +97,16 @@ async def get_task_status(
 ):
     task_info = await cache.get_task_info(task_id)
     return task_info.model_dump()
+
+@router.post(path="/create", summary="创建候选人", response_model=ResponseSchema)
+async def create_candidate(
+    candidate_data: CandidateCreateSchema,
+    session: AsyncSession = Depends(get_session_instance),
+    current_user: UserModel = Depends(get_current_user),
+):
+    async with session.begin():
+        candidate_dict = candidate_data.model_dump()
+        candidate_dict['creator_id'] = current_user.id
+        candidate_repo = CandidateRepo(session=session)
+        await candidate_repo.create_candidate(candidate_dict)
+    return ResponseSchema()
