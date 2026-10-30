@@ -9,9 +9,8 @@ from core.cache import HRCache,TaskInfoSchema
 from dependencies import get_cache_instance
 from core.ocr import PaddleOcr
 from repository.candidate_repo import ResumeRepo
-from models.candidate import ResumeModel
-
-
+from agents.resume import extract_candidate_info
+from schemas.agent_schema import AgentCandidateSchema
 async def send_email_task(message: MessageSchema):
     # 发送邮件
     mail: FastMail = create_mail_instance()
@@ -48,17 +47,9 @@ async def ocr_parse_resume_task(
         nonlocal stage
         stage = next_stage
 
-        await cache.set_task_info(
-            TaskInfoSchema(
-                task_id=task_id,
-                status="pending",
-                stage=stage,
-            )
-        )
-
+        await cache.set_task_info(TaskInfoSchema(task_id=task_id,status="pending",stage=stage,))
     try:
         await set_stage("loading_resume")
-
         async with AsyncSessionFactory() as session:
             async with session.begin():
                 resume_repo = ResumeRepo(session=session)
@@ -82,23 +73,14 @@ async def ocr_parse_resume_task(
 
         await set_stage("building_result")
         content = "\n\n".join(contents)
-        result = {"content": content}
 
-        await cache.set_task_info(
-            TaskInfoSchema(
-                task_id=task_id,
-                status="done",
-                stage="completed",
-                result=result,
-            )
-        )
-
+        candidate_info: AgentCandidateSchema = await extract_candidate_info(content)
+        await cache.set_task_info(TaskInfoSchema(task_id=task_id,status="done",stage="completed",result=candidate_info))
     except Exception as e:
         # PyCharm 控制台会打印完整调用栈和具体代码行
         logger.exception(
             f"OCR任务失败：task_id={task_id}, stage={stage}, job_id={job_id}"
         )
-
         # APIFox 中保存简洁的错误信息
         error_parts = [
             f"stage={stage}",
@@ -108,12 +90,4 @@ async def ocr_parse_resume_task(
 
         if job_id:
             error_parts.append(f"job_id={job_id}")
-
-        await cache.set_task_info(
-            TaskInfoSchema(
-                task_id=task_id,
-                status="failed",
-                stage=stage,
-                error=" | ".join(error_parts),
-            )
-        )
+        await cache.set_task_info(TaskInfoSchema(task_id=task_id,status="failed",stage=stage,error=" | ".join(error_parts),))
