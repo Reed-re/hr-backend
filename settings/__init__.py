@@ -14,12 +14,17 @@ class Settings(BaseSettings):
     DB_HOST: str = "127.0.0.1"
     DB_PORT: int = 5432
     DB_NAME: str = "hr_system"
+    DB_AGENT_NAME: str = "hr_system_agent"
+
     JWT_SECRET_KEY: str = "sdfesfsefsfhe"
     JWT_ACCESS_TOKEN_EXPIRES : timedelta = timedelta(days=365)
     JWT_REFRESH_TOKEN_EXPIRES :timedelta = timedelta(days=365)
+
     REDIS_HOST: str = "127.0.0.1"
     REDIS_PORT: int = 6379
+
     INVITE_EXPIRE: int = 60*60*24*2
+
     MAIL_USERNAME: str = Field(..., validation_alias="MAIL_USERNAME")
     MAIL_PASSWORD: str = Field(..., validation_alias="MAIL_PASSWORD")
     MAIL_FROM: str = Field(..., validation_alias="MAIL_USERNAME")
@@ -41,6 +46,11 @@ class Settings(BaseSettings):
     @property
     def DATABASE_URL(self) -> str:
         return f"postgresql+psycopg://{self.DB_USERNAME}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+    @computed_field
+    @property
+    def DATABASE_AGENT_URL(self) -> str:
+        return f"postgresql+psycopg://{self.DB_USERNAME}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_AGENT_NAME}"
 
 
 settings = Settings()
