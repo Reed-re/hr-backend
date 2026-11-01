@@ -13,6 +13,7 @@ from .candidate import CandidateModel
 class InterviewResultEnum(str, enum.Enum):
     PASSED = "PASSED"
     FAILED = "FAILED"
+    PENDING = "PENDING"
 
 
 class InterviewModel(BaseModel):
