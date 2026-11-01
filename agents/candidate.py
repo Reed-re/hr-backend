@@ -98,7 +98,7 @@ async def score_for_candidate(
     response = await score_agent.ainvoke({
         "messages": [{
             "role": "user",
-            "content": user_prompt.to_string()
+            "content": user_prompt.text
         }]
     })
     candidate_score: AgentCandidateScoreSchema = response['structured_response']

@@ -11,6 +11,11 @@ from core.ocr import PaddleOcr
 from repository.candidate_repo import ResumeRepo
 from agents.resume import extract_candidate_info
 from schemas.agent_schema import AgentCandidateSchema
+from schemas.candidate_schema import CandidateSchema
+from agents.candidate import CandidateProcessAgent
+from schemas.position_schema import PositionSchema
+from schemas.user_schema import UserSchema
+
 async def send_email_task(message: MessageSchema):
     # 发送邮件
     mail: FastMail = create_mail_instance()
@@ -91,3 +96,22 @@ async def ocr_parse_resume_task(
         if job_id:
             error_parts.append(f"job_id={job_id}")
         await cache.set_task_info(TaskInfoSchema(task_id=task_id,status="failed",stage=stage,error=" | ".join(error_parts),))
+
+async def run_candidate_agent(
+    candidate: CandidateSchema,
+    position: PositionSchema,
+    interviewer: UserSchema
+):
+    async with CandidateProcessAgent(
+        candidate=candidate,
+        position=position,
+        interviewer=interviewer
+    ) as agent:
+        response = await agent.ainvoke(
+            messages = [{
+                "role": "user",
+                "content": f"候选人信息：{candidate.model_dump_json()}，职位信息：{position.model_dump_json()}"
+            }],
+            thread_id = candidate.email
+        )
+        return response

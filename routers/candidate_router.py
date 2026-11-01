@@ -17,6 +17,12 @@ from tasks import ocr_parse_resume_task
 from dependencies import get_cache_instance
 from core.cache import HRCache
 from schemas import ResponseSchema
+from repository.position_repo import PositionRepo
+from repository.user_repo import UserRepo
+from tasks import run_candidate_agent
+from schemas.candidate_schema import CandidateSchema
+from schemas.position_schema import PositionSchema
+from schemas.user_schema import UserSchema
 # 上传简历
 @router.post(path="/resume/upload", summary="上传简历",response_model=ResumeUploadRespSchema)
 async def resume_upload(
@@ -110,3 +116,26 @@ async def create_candidate(
         candidate_repo = CandidateRepo(session=session)
         await candidate_repo.create_candidate(candidate_dict)
     return ResponseSchema()
+
+@router.get("/agent/test")
+async def agent_test(
+    background_tasks: BackgroundTasks,
+    session: AsyncSession = Depends(get_session_instance),
+):
+    async with session.begin():
+        candidate_repo = CandidateRepo(session=session)
+        position_repo = PositionRepo(session=session)
+        user_repo = UserRepo(session=session)
+
+        candidate_model = await candidate_repo.get_by_id("mFYzETmvRRo93YEFH5UNT4")
+        position_model = await position_repo.get_by_id("kBbm4wqnVAMbMfUMReLePe")
+        interviewer_model = await user_repo.get_by_id("cpoDFejuUgz4zykuFCU2gm")
+
+        background_tasks.add_task(
+            run_candidate_agent,
+            candidate=CandidateSchema.model_validate(candidate_model),
+            position=PositionSchema.model_validate(position_model),
+            interviewer=UserSchema.model_validate(interviewer_model),
+        )
+
+    return {"result": "success"}
