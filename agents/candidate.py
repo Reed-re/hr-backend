@@ -19,7 +19,7 @@ from repository.candidate_repo import CandidateAIScoreRepo, CandidateRepo,Candid
 from core.dingtalk import DingTalkHttp
 from core.cache import HRCache,DingTalkTokenInfoSchema
 from loguru import logger
-from datetime import datetime,timedelta
+from datetime import datetime,timedelta,time,timezone
 from utils.iso8601 import datetime_to_iso8601_beijing,iso8601_to_datetime_beijing
 from utils.available_time import find_available_slot
 from models.user import DingdingUserModel
@@ -138,7 +138,7 @@ async def get_interviewer_available_slot(
             try:
                 user_repo = UserRepo(session)
                 dingding_user: DingdingUserModel = await user_repo.get_dingding_user(
-                    user_id=interviewer.user_id)
+                    user_id=interviewer.id)
                 if not dingding_user:
                     return f"获取候选人可用时间失败，没有绑定钉钉账号！"
                 union_id = dingding_user.union_id
@@ -147,7 +147,7 @@ async def get_interviewer_available_slot(
 
     try:
         # 2. 获取access_token
-        access_token: str = await get_dingtalk_access_token(interviewer.user_id)
+        access_token: str = await get_dingtalk_access_token(interviewer.id)
     except Exception as e:
         logger.error(e)
         return f"获取面试官可用时间失败：{e}"
@@ -155,8 +155,13 @@ async def get_interviewer_available_slot(
     # 3. 从钉钉上获取面试官的日程安排
     try:
         dingtalk_http = DingTalkHttp()
-        now = datetime.now()
-        tomorrow_nine = datetime(year=now.year, month=now.month, day=now.day, hour=9)
+        beijing_tz = timezone(timedelta(hours=8))
+        tomorrow = datetime.now(beijing_tz).date() + timedelta(days=1)
+        tomorrow_nine = datetime.combine(
+            tomorrow,
+            time(hour=9),
+            tzinfo=beijing_tz,
+        )
         events: list[dict[str, Any]] = await dingtalk_http.get_calendar_list(
             union_id=union_id,
             access_token=access_token,

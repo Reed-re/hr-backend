@@ -29,7 +29,12 @@ def find_available_slot(
         tomorrow = datetime.now().date() + timedelta(days=1)
         current_search_date = datetime.combine(tomorrow, time.min)
     else:
-        current_search_date = datetime.combine(start_date.date(), time.min)
+        tzinfo = start_date.tzinfo
+        current_search_date = datetime.combine(
+            start_date.date(),
+            time.min,
+            tzinfo=tzinfo,
+        )
 
     # 2. 定义每日有效时间窗口（上午+下午）
     daily_windows = [
@@ -54,8 +59,16 @@ def find_available_slot(
 
         # 检查每个有效时间窗口
         for win_start_time, win_end_time in daily_windows:
-            window_start = datetime.combine(search_date.date(), win_start_time)
-            window_end = datetime.combine(search_date.date(), win_end_time)
+            window_start = datetime.combine(
+                search_date.date(),
+                win_start_time,
+                tzinfo=current_search_date.tzinfo,
+            )
+            window_end = datetime.combine(
+                search_date.date(),
+                win_end_time,
+                tzinfo=current_search_date.tzinfo,
+            )
 
             # 收集当天与当前窗口重叠的忙碌时段
             conflicts = []

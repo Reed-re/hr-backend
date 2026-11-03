@@ -112,6 +112,6 @@ async def run_candidate_agent(
                 "role": "user",
                 "content": f"候选人信息：{candidate.model_dump_json()}，职位信息：{position.model_dump_json()}"
             }],
-            thread_id = candidate.email
+            thread_id = candidate.id
         )
         return response

@@ -25,10 +25,10 @@ async def lifespan(app: FastAPI):
 
     yield
     await redis.close()
-    if bot.is_connected():
+    if bot.is_connected:
         await bot.close()
     if scheduler.running:
-        await scheduler.shutdown(wait= False)
+        scheduler.shutdown(wait= False)
 
 app = FastAPI(lifespan=lifespan)
 
