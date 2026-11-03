@@ -1,11 +1,7 @@
 import enum
 from typing import Optional
-
-from sqlalchemy import (
-    String, Text, Integer,Enum as SQLAlchemyEnum, ForeignKey,JSON
-)
+from sqlalchemy import (String, Text, Integer,Enum as SQLAlchemyEnum, ForeignKey,JSON)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from . import BaseModel
 from .user import UserModel
 from .positions import PositionModel
