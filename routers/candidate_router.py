@@ -12,7 +12,10 @@ from loguru import logger
 from repository.candidate_repo import ResumeRepo,CandidateRepo
 from schemas.candidate_schema import ResumeUploadRespSchema,CandidateCreateSchema,CandidateStatusUpdateSchema
 from core.ocr import PaddleOcr
-from schemas.candidate_schema import ResumeParseTaskRespSchema,ResumePaseSchema,ResumeParseTaskInfoRespSchema
+from schemas.candidate_schema import (ResumeParseTaskRespSchema,
+                                      ResumePaseSchema,
+                                      ResumeParseTaskInfoRespSchema,
+                                      CandidateAIscoreRespSchema)
 from tasks import ocr_parse_resume_task
 from dependencies import get_cache_instance
 from core.cache import HRCache
@@ -26,6 +29,7 @@ from schemas.user_schema import UserSchema
 from models.candidate import CandidateStatusEnum
 from repository.review_repo import InterviewRepo
 from models.interview import InterviewResultEnum,InterviewModel
+from repository.candidate_repo import CandidateAIScoreRepo
 # 上传简历
 @router.post(path="/resume/upload", summary="上传简历",response_model=ResumeUploadRespSchema)
 async def resume_upload(
@@ -226,6 +230,21 @@ async def update_candidate_status(
         # 更新候选人状态
         await candidate_repo.update_candidate_status(candidate_id=candidate_id,status=status_data.status)
         return ResponseSchema()
+
+@router.get(path="/ai-score/{candidate_id}", summary="获取候选人AI得分",response_model=CandidateAIscoreRespSchema)
+async def get_candidate_ai_score(
+    candidate_id: str,
+    session: AsyncSession = Depends(get_session_instance),
+    _: UserModel = Depends(get_current_user),
+):
+
+    async with session.begin():
+        score_repo = CandidateAIScoreRepo(session)
+        ai_score = await score_repo.get_by_candidate_id(candidate_id)
+        if not ai_score:
+            raise HTTPException(status_code=400, detail="候选人的AI评分不存在！")
+        return {"ai_score": ai_score}
+
 
 
 @router.get("/agent/test")
