@@ -16,8 +16,8 @@ class EmailBotSettings(BaseModel):
 
     # SMTP：用于发邮件
     smtp_host: str = Field(..., description="SMTP协议邮件服务器的主机")
-    smtp_port: int = Field(587, description="SMTP协议邮件服务器的端口号")
-    smtp_starttls: bool = Field(True, description="使用TLS协议")
+    smtp_port: int = Field(465, description="SMTP协议邮件服务器的端口号")
+    smtp_starttls: bool = Field(False, description="使用TLS协议")
 
     # Polling helpers
     default_fetch_limit: int = Field(10, description="每次检测最新的多少封邮件")

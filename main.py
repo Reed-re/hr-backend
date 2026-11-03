@@ -9,6 +9,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from routers.position_router import router as position_router
 from routers.candidate_router import router as candidate_router
+from scheduler import start_email_polling
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -19,8 +20,15 @@ async def lifespan(app: FastAPI):
     )
     redis_backend = RedisBackend(redis)
     FastAPICache.init(redis_backend, prefix="fastapi-cache")
+
+    bot,scheduler = await start_email_polling()
+
     yield
     await redis.close()
+    if bot.is_connected():
+        await bot.close()
+    if scheduler.running:
+        await scheduler.shutdown(wait= False)
 
 app = FastAPI(lifespan=lifespan)
 

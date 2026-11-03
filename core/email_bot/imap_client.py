@@ -5,6 +5,8 @@ from email import message_from_bytes
 from email.message import Message
 from typing import Iterable, Optional
 from loguru import logger
+import ssl
+from .tls_socket import ResilientIMAP4SSL
 
 class ImapClient:
     """A tiny IMAP client wrapped with asyncio.to_thread.
@@ -25,8 +27,17 @@ class ImapClient:
     async def connect(self) -> None:
         def _connect():
             if self._ssl:
-                return imaplib.IMAP4_SSL(self._host, self._port)
-            return imaplib.IMAP4(self._host, self._port)
+                return ResilientIMAP4SSL(
+                    self._host,
+                    self._port,
+                    ssl_context=ssl.create_default_context(),
+                    timeout=15,
+                )
+            return imaplib.IMAP4(
+                self._host,
+                self._port,
+                timeout=30,
+            )
 
         self._conn = await asyncio.to_thread(_connect)
 

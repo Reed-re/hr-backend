@@ -115,7 +115,7 @@ async def score_for_candidate(
                 )
                 # 2. 判断得分情况，如果超过8分，那么修改状态为AI_PASS，否则就是AI_FAILED
                 status = CandidateStatusEnum.AI_FILTER_FAILED
-                if candidate_score.overall_score > 8:
+                if candidate_score.overall_score > 5:
                     status = CandidateStatusEnum.AI_FILTER_PASSED
 
                 await candidate_repo.update_candidate_status(candidate_id=candidate.id, status=status)

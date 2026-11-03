@@ -127,8 +127,8 @@ async def agent_test(
         position_repo = PositionRepo(session=session)
         user_repo = UserRepo(session=session)
 
-        candidate_model = await candidate_repo.get_by_id("mFYzETmvRRo93YEFH5UNT4")
-        position_model = await position_repo.get_by_id("kBbm4wqnVAMbMfUMReLePe")
+        candidate_model = await candidate_repo.get_by_id("WVLFtDNUWF2jbr3Z2XYxAP")
+        position_model = await position_repo.get_by_id("ja2RUwskDKNSBs4yf9E8d8")
         interviewer_model = await user_repo.get_by_id("cpoDFejuUgz4zykuFCU2gm")
 
         background_tasks.add_task(
