@@ -10,7 +10,7 @@ from fastapi_cache.backends.redis import RedisBackend
 from routers.position_router import router as position_router
 from routers.candidate_router import router as candidate_router
 from scheduler import start_email_polling
-
+from routers.dashboard_router import router as dashboard_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     redis = aioredis.from_url(
@@ -44,6 +44,7 @@ app.add_middleware(
 app.include_router(user_router)
 app.include_router(position_router)
 app.include_router(candidate_router)
+app.include_router(dashboard_router)
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
