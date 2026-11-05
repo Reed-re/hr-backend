@@ -49,6 +49,8 @@ class Settings(BaseSettings):
 
     PADDLE_OCR_ACCESS_TOKEN: str = Field(..., validation_alias="PADDLE_OCR_ACCESS_TOKEN")
 
+    DEBUG:bool = True
+
     @computed_field
     @property
     def DATABASE_URL(self) -> str:

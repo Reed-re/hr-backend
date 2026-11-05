@@ -30,6 +30,7 @@ from models.candidate import CandidateStatusEnum
 from repository.review_repo import InterviewRepo
 from models.interview import InterviewResultEnum,InterviewModel
 from repository.candidate_repo import CandidateAIScoreRepo
+from pathlib import Path
 # 上传简历
 @router.post(path="/resume/upload", summary="上传简历",response_model=ResumeUploadRespSchema)
 async def resume_upload(
@@ -78,7 +79,8 @@ async def resume_upload(
 
     async with session.begin():
         resume_repo = ResumeRepo(session=session)
-        resume = await resume_repo.create_resume(file_path=file_path, uploader_id=current_user.id)
+        file_name = Path(file_path).name
+        resume = await resume_repo.create_resume(file_path=file_name, uploader_id=current_user.id)
     return {"resume": resume}
 
 @router.get("/resume/ocr/test")
