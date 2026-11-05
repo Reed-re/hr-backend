@@ -11,7 +11,8 @@ from schemas.user_schema import (
     UserListRespSchema,
     DepartmentListRespSchema,
     DingdingUserRespSchema,
-    AssignDepartmentSchema
+    AssignDepartmentSchema,
+    HrListRespSchema
 )
 from dependencies import get_session_instance,AuthHandler,get_auth_handler,get_cache_instance,get_super_user,get_current_user
 from models import AsyncSession
@@ -139,7 +140,8 @@ async def user_list(
             size=size,
             department_id=department_id
         )
-    return {"users": users}
+        total = await user_repo.get_user_count(department_id=department_id)
+    return {"users": users,"total": total}
 
 @router.patch(path="/status/update",summary="修改员工状态",response_model=ResponseSchema
 )
@@ -293,3 +295,14 @@ async def assign_department(
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     return ResponseSchema()
+
+@router.get(path="/hr/list", summary="获取HR列表", response_model=HrListRespSchema)
+async def get_hr_list(
+    session: AsyncSession = Depends(get_session_instance),
+    _: UserModel = Depends(get_super_user),
+):
+
+    async with session.begin():
+        user_repo = UserRepo(session)
+        hrs = await user_repo.get_hr_list()
+        return {"hrs": hrs}

@@ -53,6 +53,7 @@ async def init_user():
                     "email": "hr@qq.com",
                     "realname": "周HR",
                     "is_superuser": False,
+                    "is_hr": True,
                     "department_id": hr_department.id,
                 }, {
                     "username": "tech",
