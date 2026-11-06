@@ -111,8 +111,15 @@ async def get_task_status(
     _: UserModel = Depends(get_current_user)
 ):
     task_info = await cache.get_task_info(task_id)
+    if task_info is None:
+        return {
+            "task_id": task_id,
+            "status": "pending",
+            "stage": "queued",
+            "result": None,
+            "error": None,
+        }
     return task_info.model_dump()
-
 @router.post(path="/create", summary="创建候选人", response_model=ResponseSchema)
 async def create_candidate(
     candidate_data: CandidateCreateSchema,

@@ -1,7 +1,74 @@
+# from datetime import timedelta
+#
+# from pydantic_settings import BaseSettings
+# from pydantic import computed_field,Field
+# import os
+#
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#
+#
+# class Settings(BaseSettings):
+#     # DB
+#     DB_USERNAME: str = "postgres"
+#     DB_PASSWORD: str = "1234"
+#     DB_HOST: str = "127.0.0.1"
+#     DB_PORT: int = 5432
+#     DB_NAME: str = "hr_system"
+#     DB_AGENT_NAME: str = "hr_system_agent"
+#
+#     JWT_SECRET_KEY: str = "sdfesfsefsfhe"
+#     JWT_ACCESS_TOKEN_EXPIRES : timedelta = timedelta(days=365)
+#     JWT_REFRESH_TOKEN_EXPIRES :timedelta = timedelta(days=365)
+#
+#     REDIS_HOST: str = "127.0.0.1"
+#     REDIS_PORT: int = 6379
+#
+#     INVITE_EXPIRE: int = 60*60*24*2
+#
+#     MAIL_USERNAME: str = Field(..., validation_alias="MAIL_USERNAME")
+#     MAIL_PASSWORD: str = Field(..., validation_alias="MAIL_PASSWORD")
+#     MAIL_FROM: str = Field(..., validation_alias="MAIL_USERNAME")
+#     MAIL_PORT: int = 587
+#     MAIL_SERVER: str = "smtp.qq.com"
+#     MAIL_FROM_NAME: str = "Reed"
+#     MAIL_STARTTLS: bool = True
+#     MAIL_SSL_TLS: bool = False
+#
+#     # 邮箱机器人配置
+#     EMAIL_BOT_IMAP_HOST: str = "imap.qq.com"
+#     EMAIL_BOT_SMTP_HOST: str = "smtp.qq.com"
+#     EMAIL_BOT_EMAIL: str = Field(..., validation_alias="MAIL_USERNAME")
+#     EMAIL_BOT_PASSWORD: str = Field(..., validation_alias="MAIL_PASSWORD")
+#
+#     DINGTALK_CLIENT_ID: str = Field(..., validation_alias="DINGTALK_APP_KEY")
+#     DINGTALK_CLIENT_SECRET: str = Field(..., validation_alias="DINGTALK_APP_SECRET")
+#
+#     BACKEND_BASE_URL: str = "https://glitter-math-lard.ngrok-free.dev"
+#
+#     RESUME_DIR: str = os.path.join(BASE_DIR, "upload")
+#
+#     PADDLE_OCR_ACCESS_TOKEN: str = Field(..., validation_alias="PADDLE_OCR_ACCESS_TOKEN")
+#
+#     DEBUG:bool = True
+#
+#     @computed_field
+#     @property
+#     def DATABASE_URL(self) -> str:
+#         return f"postgresql+psycopg://{self.DB_USERNAME}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+#
+#     @computed_field
+#     @property
+#     def DATABASE_AGENT_URL(self) -> str:
+#         return f"postgresql://{self.DB_USERNAME}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_AGENT_NAME}"
+#
+#
+# settings = Settings()
+
+
 from datetime import timedelta
 
 from pydantic_settings import BaseSettings
-from pydantic import computed_field,Field
+from pydantic import computed_field, Field
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -9,28 +76,31 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 class Settings(BaseSettings):
     # DB
-    DB_USERNAME: str = "postgres"
-    DB_PASSWORD: str = "1234"
-    DB_HOST: str = "127.0.0.1"
-    DB_PORT: int = 5432
+    DB_USERNAME: str = Field(..., validation_alias="DB_USERNAME")
+    DB_PASSWORD: str = Field(..., validation_alias="DB_PASSWORD")
+    DB_HOST: str = Field(..., validation_alias="DB_HOST")
+    DB_PORT: int = Field(..., validation_alias="DB_PORT")
     DB_NAME: str = "hr_system"
     DB_AGENT_NAME: str = "hr_system_agent"
 
-    JWT_SECRET_KEY: str = "sdfesfsefsfhe"
-    JWT_ACCESS_TOKEN_EXPIRES : timedelta = timedelta(days=365)
-    JWT_REFRESH_TOKEN_EXPIRES :timedelta = timedelta(days=365)
+    JWT_SECRET_KEY: str = Field(..., validation_alias="JWT_SECRET_KEY")
+    JWT_ACCESS_TOKEN_EXPIRES: timedelta = timedelta(days=7)
+    JWT_REFRESH_TOKEN_EXPIRES: timedelta = timedelta(days=30)
 
-    REDIS_HOST: str = "127.0.0.1"
-    REDIS_PORT: int = 6379
+    # redis配置
+    REDIS_HOST: str = Field('127.0.0.1', validation_alias="REDIS_HOST")
+    REDIS_PORT: int = Field(6389, validation_alias="REDIS_PORT")
 
-    INVITE_EXPIRE: int = 60*60*24*2
+    # 邀请码过期时间
+    INVITE_CODE_EXPIRE: int = 60*60*24*2
 
+    # 邮箱相关的配置
     MAIL_USERNAME: str = Field(..., validation_alias="MAIL_USERNAME")
     MAIL_PASSWORD: str = Field(..., validation_alias="MAIL_PASSWORD")
     MAIL_FROM: str = Field(..., validation_alias="MAIL_USERNAME")
     MAIL_PORT: int = 587
     MAIL_SERVER: str = "smtp.qq.com"
-    MAIL_FROM_NAME: str = "Reed"
+    MAIL_FROM_NAME: str = "Reed-Email"
     MAIL_STARTTLS: bool = True
     MAIL_SSL_TLS: bool = False
 
@@ -40,16 +110,24 @@ class Settings(BaseSettings):
     EMAIL_BOT_EMAIL: str = Field(..., validation_alias="MAIL_USERNAME")
     EMAIL_BOT_PASSWORD: str = Field(..., validation_alias="MAIL_PASSWORD")
 
+    # 阿里云百炼平台的API_KEY
+    DASHSCOPE_API_KEY: str = Field(..., validation_alias="DASHSCOPE_API_KEY")
+
+
+    # 钉钉相关的配置
     DINGTALK_CLIENT_ID: str = Field(..., validation_alias="DINGTALK_APP_KEY")
     DINGTALK_CLIENT_SECRET: str = Field(..., validation_alias="DINGTALK_APP_SECRET")
 
-    BACKEND_BASE_URL: str = "https://glitter-math-lard.ngrok-free.dev"
+    # 前端和后端的域名
+    BACKEND_BASE_URL: str = Field("https://glitter-math-lard.ngrok-free.dev", validation_alias="BACKEND_BASE_URL")
 
+    # 简历上传存储路径
     RESUME_DIR: str = os.path.join(BASE_DIR, "upload")
 
+    # Paddle OCR Access Token
     PADDLE_OCR_ACCESS_TOKEN: str = Field(..., validation_alias="PADDLE_OCR_ACCESS_TOKEN")
 
-    DEBUG:bool = True
+    DEBUG: bool = False
 
     @computed_field
     @property
